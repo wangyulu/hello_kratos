@@ -4,6 +4,7 @@ import (
 	v1 "hello/api/helloworld/v1"
 	v12 "hello/api/user/v1"
 	"hello/internal/conf"
+	"hello/internal/pkg/response"
 	"hello/internal/service"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -17,6 +18,8 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, user *servic
 		http.Middleware(
 			recovery.Recovery(),
 		),
+		http.ResponseEncoder(response.DefEncodeResponseFunc()),
+		http.ErrorEncoder(response.DefEncodeErrorFunc()),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))

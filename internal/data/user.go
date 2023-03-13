@@ -3,7 +3,10 @@ package data
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"gorm.io/gorm"
+	v1 "hello/api/user/v1"
 	"hello/internal/biz"
 	"hello/internal/data/entity"
 	"hello/internal/pkg/timehelper"
@@ -43,6 +46,9 @@ func (r *UserRepo) CreateUser(ctx context.Context, user *biz.User) (*biz.User, e
 func (r *UserRepo) UpdateUser(ctx context.Context, user *biz.User) (*biz.User, error) {
 	var entity entity.User
 	if err := r.data.db.WithContext(ctx).First(&entity, user.Id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, v1.ErrorUserNotFound("用户 %d 没找到", user.Id)
+		}
 		return nil, err
 	}
 
@@ -60,6 +66,9 @@ func (r *UserRepo) UpdateUser(ctx context.Context, user *biz.User) (*biz.User, e
 func (r *UserRepo) DeleteUser(ctx context.Context, id int64) error {
 	var entity entity.User
 	if err := r.data.db.WithContext(ctx).First(&entity, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return v1.ErrorUserNotFound("用户 %d 没找到", id)
+		}
 		return err
 	}
 
@@ -69,6 +78,9 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id int64) error {
 func (r *UserRepo) GetUser(ctx context.Context, id int64) (*biz.User, error) {
 	var repoDemo entity.User
 	if err := r.data.db.WithContext(ctx).First(&repoDemo, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, v1.ErrorUserNotFound("用户 %d 没找到", id)
+		}
 		return nil, err
 	}
 
