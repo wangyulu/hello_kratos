@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"hello/internal/pkg/validate"
 )
 
 type User struct {
 	Id        int64
-	Name      string
+	Name      string `validate:"required,len=10" label:"姓名"`
 	Age       int32
-	Mobile    string
+	Mobile    string `validate:"required"`
 	CreatedAt string
 	UpdatedAt string
 }
@@ -45,6 +46,9 @@ func NewUserUseCase(repo UserRepo, logger log.Logger) *UserUseCase {
 }
 
 func (uc *UserUseCase) CreateUser(ctx context.Context, user *User) (*User, error) {
+	if err := validate.Validate(user); err != nil {
+		return nil, err
+	}
 	return uc.repo.CreateUser(ctx, user)
 }
 
